@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云存储上传演示 - 支持任意大小文件</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .upload-zone {
+            border: 3px dashed #8b5cf6;
+            transition: all 0.3s;
+        }
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: #3b82f6;
+            background-color: rgba(139, 92, 246, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-green-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- 头部 -->
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold gradient-text mb-2">☁️ 云存储上传演示</h1>
+            <p class="text-gray-600 text-sm sm:text-base">支持任意大小文件上传，无存储限制！</p>
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
+                <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-green-800 text-xs sm:text-sm">
+                    ✅ 无大小限制
+                </span>
+                <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-blue-800 text-xs sm:text-sm">
+                    ✅ 云端存储
+                </span>
+                <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-purple-800 text-xs sm:text-sm">
+                    ✅ 高速上传
+                </span>
+            </div>
+        </div>
+
+        <!-- 上传区域 -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8">
+            <h2 class="text-xl sm:text-2xl font-bold mb-4">上传新资源</h2>
+
+            <!-- 上传方式选择 -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-2">上传方式</label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                        type="button"
+                        onclick="setUploadMode('url')"
+                        id="mode-url"
+                        class="upload-mode-btn px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-700 font-bold text-sm sm:text-base"
+                    >
+                        🔗 网络链接
+                        <span class="block text-xs font-normal mt-1">粘贴网盘链接</span>
+                    </button>
+                    <button
+                        type="button"
+                        onclick="setUploadMode('cloud')"
+                        id="mode-cloud"
+                        class="upload-mode-btn active px-4 py-3 rounded-xl border-2 border-purple-500 bg-purple-50 text-purple-700 font-bold text-sm sm:text-base"
+                    >
+                        ☁️ 云存储
+                        <span class="block text-xs font-normal mt-1">推荐，无大小限制</span>
+                    </button>
+                    <button
+                        type="button"
+                        onclick="setUploadMode('base64')"
+                        id="mode-base64"
+                        class="upload-mode-btn px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-700 font-bold text-sm sm:text-base"
+                    >
+                        💾 本地存储
+                        <span class="block text-xs font-normal mt-1">建议小于10MB</span>
+                    </button>
+                </div>
+                <p id="mode-hint" class="mt-2 text-sm text-gray-500">
+                    ✨ 推荐：文件将上传到云端，无大小限制，支持高速传输
+                </p>
+            </div>
+
+            <form id="uploadForm" onsubmit="handleUpload(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">资源类型</label>
+                    <select
+                        id="resourceType"
+                        class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:border-purple-500 focus:outline-none"
+                        required
+                    >
+                        <option value="video">🎬 视频微课</option>
+                        <option value="ppt">📊 PPT课件</option>
+                        <option value="ai">🤖 AI互动</option>
+                    </select>
+                </div>
+
+                <!-- URL 模式 -->
+                <div id="url-mode-fields" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">资源链接</label>
+                        <input
+                            type="url"
+                            id="urlInput"
+                            placeholder="https://example.com/file.mp4"
+                            class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:border-purple-500 focus:outline-none"
+                            required
+                        />
+                        <p class="mt-1 text-xs text-gray-500">粘贴文件的直接下载链接或网盘分享链接</p>
+                    </div>
+                </div>
+
+                <!-- Base64 模式（隐藏） -->
+                <div id="base64-mode-fields" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">选择文件</label>
+                        <input
+                            type="file"
+                            id="fileInput"
+                            accept=".mp4,.webm,.ogg,.ppt,.pptx,.html,.json,.txt,.pdf,.doc,.docx"
+                            class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:border-purple-500 focus:outline-none"
+                        />
+                        <p class="mt-1 text-xs text-gray-500">支持：视频、PPT、PDF、文档等（建议小于10MB）</p>
+                    </div>
+                </div>
+
+                <!-- 云存储模式 -->
+                <div id="cloud-mode-fields">
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">选择文件（支持任意大小）</label>
+                        <div
+                            id="dropZone"
+                            class="upload-zone rounded-xl p-8 text-center cursor-pointer"
+                            onclick="document.getElementById('fileInputCloud').click()"
+                        >
+                            <input
+                                type="file"
+                                id="fileInputCloud"
+                                accept=".mp4,.webm,.ogg,.ppt,.pptx,.html,.json,.txt,.pdf,.doc,.docx"
+                                class="hidden"
+                                onchange="handleFileSelect(event)"
+                            />
+                            <div id="dropZoneContent">
+                                <div class="text-6xl mb-4">☁️</div>
+                                <p class="text-lg font-bold text-gray-700 mb-2">点击或拖拽文件到这里</p>
+                                <p class="text-sm text-gray-500">支持任意大小的视频、PPT、文档等</p>
+                            </div>
+                            <div id="selectedFileInfo" class="hidden">
+                                <div class="text-4xl mb-2">📄</div>
+                                <p id="selectedFileName" class="font-bold text-gray-900 mb-1"></p>
+                                <p id="selectedFileSize" class="text-sm text-gray-600"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">资源标题</label>
+                    <input
+                        type="text"
+                        id="titleInput"
+                        placeholder="例如：小星星儿歌"
+                        class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:border-purple-500 focus:outline-none"
+                        required
+                    />
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">资源描述（可选）</label>
+                    <textarea
+                        id="descriptionInput"
+                        placeholder="例如：适合3-4岁幼儿的经典儿歌教学"
+                        rows="3"
+                        class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:border-purple-500 focus:outline-none"
+                    ></textarea>
+                </div>
+
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="w-full rounded-xl bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 px-6 py-4 font-bold text-white transition-all hover:scale-105 hover:shadow-lg text-lg"
+                >
+                    ☁️ 上传到云端
+                </button>
+            </form>
+        </div>
+
+        <!-- 筛选按钮 -->
+        <div class="mb-6 flex flex-wrap justify-center gap-3">
+            <button
+                onclick="filterResources('all')"
+                id="btn-all"
+                class="filter-btn px-4 py-2 rounded-full font-bold transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 text-white shadow-lg text-sm sm:text-base"
+            >
+                📦 全部资源
+            </button>
+            <button
+                onclick="filterResources('video')"
+                id="btn-video"
+                class="filter-btn px-4 py-2 rounded-full font-bold transition-all duration-200 transform hover:scale-105 bg-white text-gray-700 hover:shadow-md text-sm sm:text-base"
+            >
+                🎬 视频微课
+            </button>
+            <button
+                onclick="filterResources('ppt')"
+                id="btn-ppt"
+                class="filter-btn px-4 py-2 rounded-full font-bold transition-all duration-200 transform hover:scale-105 bg-white text-gray-700 hover:shadow-md text-sm sm:text-base"
+            >
+                📊 PPT课件
+            </button>
+            <button
+                onclick="filterResources('ai')"
+                id="btn-ai"
+                class="filter-btn px-4 py-2 rounded-full font-bold transition-all duration-200 transform hover:scale-105 bg-white text-gray-700 hover:shadow-md text-sm sm:text-base"
+            >
+                🤖 AI互动
+            </button>
+        </div>
+
+        <!-- 存储模式统计 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-4">
+                <div class="text-sm text-gray-600">云存储资源</div>
+                <div id="cloudCount" class="text-2xl font-bold text-purple-600">0</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-4">
+                <div class="text-sm text-gray-600">链接资源</div>
+                <div id="urlCount" class="text-2xl font-bold text-blue-600">0</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-4">
+                <div class="text-sm text-gray-600">本地存储</div>
+                <div id="base64Count" class="text-2xl font-bold text-green-600">0</div>
+            </div>
+        </div>
+
+        <!-- 资源列表 -->
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl sm:text-2xl font-bold">资源列表</h2>
+                <button
+                    onclick="clearAllResources()"
+                    class="px-4 py-2 rounded-lg bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-all"
+                >
+                    清空所有
+                </button>
+            </div>
+            <div id="resources-container">
+                <!-- 资源列表将通过 JavaScript 动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传进度提示 -->
+    <div id="uploadProgress" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background-color: rgba(0,0,0,0.9)">
+        <div class="text-center text-white">
+            <div class="mb-4">
+                <svg class="mx-auto h-16 w-16 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+            <p id="uploadStatus" class="text-lg">上传中...</p>
+            <p id="uploadPercent" class="text-sm text-gray-400 mt-2">0%</p>
+        </div>
+    </div>
+
+    <!-- 引入云存储上传模块 -->
+    <script src="uploadHandler-cloud.js"></script>
+
+    <script>
+        // 初始化上传处理器
+        const uploadHandler = new UploadHandlerCloud({
+            storageKey: 'cloudDemoResources',
+            maxFileSize: 10 * 1024 * 1024, // 10MB（仅用于 Base64 模式）
+            apiEndpoint: '/api/upload' // 云存储 API 端点
+        });
+
+        // 当前选中的筛选类型
+        let selectedType = 'all';
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderResources();
+            updateStorageStats();
+            setupDragAndDrop();
+        });
+
+        // 设置拖拽上传
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('drag-over');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('drag-over');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const fileInput = document.getElementById('fileInputCloud');
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(files[0]);
+                    fileInput.files = dataTransfer.files;
+                    handleFileSelect({ target: fileInput });
+                }
+            }, false);
+        }
+
+        // 处理文件选择
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const dropZoneContent = document.getElementById('dropZoneContent');
+            const selectedFileInfo = document.getElementById('selectedFileInfo');
+            const selectedFileName = document.getElementById('selectedFileName');
+            const selectedFileSize = document.getElementById('selectedFileSize');
+
+            dropZoneContent.classList.add('hidden');
+            selectedFileInfo.classList.remove('hidden');
+
+            selectedFileName.textContent = file.name;
+            selectedFileSize.textContent = uploadHandler.formatFileSize(file.size);
+        }
+
+        // 设置上传方式
+        function setUploadMode(mode) {
+            uploadHandler.setUploadMode(mode);
+
+            const urlModeFields = document.getElementById('url-mode-fields');
+            const base64ModeFields = document.getElementById('base64-mode-fields');
+            const cloudModeFields = document.getElementById('cloud-mode-fields');
+            const modeHint = document.getElementById('mode-hint');
+            const submitBtn = document.getElementById('submitBtn');
+
+            const urlBtn = document.getElementById('mode-url');
+            const base64Btn = document.getElementById('mode-base64');
+            const cloudBtn = document.getElementById('mode-cloud');
+
+            const urlInput = document.getElementById('urlInput');
+            const fileInput = document.getElementById('fileInput');
+            const fileInputCloud = document.getElementById('fileInputCloud');
+
+            // 重置按钮样式
+            [urlBtn, base64Btn, cloudBtn].forEach(btn => {
+                btn.classList.remove('border-purple-500', 'bg-purple-50', 'text-purple-700', 'active');
+                btn.classList.add('border-gray-200', 'bg-white', 'text-gray-700');
+            });
+
+            if (mode === 'url') {
+                urlModeFields.classList.remove('hidden');
+                base64ModeFields.classList.add('hidden');
+                cloudModeFields.classList.add('hidden');
+                modeHint.textContent = '粘贴网盘分享链接，快速添加资源';
+                submitBtn.textContent = '🔗 添加资源';
+
+                urlBtn.classList.add('border-purple-500', 'bg-purple-50', 'text-purple-700', 'active');
+                urlBtn.classList.remove('border-gray-200', 'bg-white', 'text-gray-700');
+                urlInput.required = true;
+                fileInput.required = false;
+                fileInputCloud.required = false;
+            } else if (mode === 'base64') {
+                urlModeFields.classList.add('hidden');
+                base64ModeFields.classList.remove('hidden');
+                cloudModeFields.classList.add('hidden');
+                modeHint.textContent = '文件将转换为 Base64 编码存储在浏览器本地（建议小于10MB）';
+                submitBtn.textContent = '💾 保存到本地';
+
+                base64Btn.classList.add('border-purple-500', 'bg-purple-50', 'text-purple-700', 'active');
+                base64Btn.classList.remove('border-gray-200', 'bg-white', 'text-gray-700');
+                urlInput.required = false;
+                fileInput.required = true;
+                fileInputCloud.required = false;
+            } else {
+                urlModeFields.classList.add('hidden');
+                base64ModeFields.classList.add('hidden');
+                cloudModeFields.classList.remove('hidden');
+                modeHint.textContent = '✨ 推荐：文件将上传到云端，无大小限制，支持高速传输';
+                submitBtn.textContent = '☁️ 上传到云端';
+
+                cloudBtn.classList.add('border-purple-500', 'bg-purple-50', 'text-purple-700', 'active');
+                cloudBtn.classList.remove('border-gray-200', 'bg-white', 'text-gray-700');
+                urlInput.required = false;
+                fileInput.required = false;
+                fileInputCloud.required = true;
+            }
+        }
+
+        // 处理上传
+        async function handleUpload(event) {
+            event.preventDefault();
+
+            const type = document.getElementById('resourceType').value;
+            const title = document.getElementById('titleInput').value;
+            const description = document.getElementById('descriptionInput').value;
+
+            // 显示进度
+            const progress = document.getElementById('uploadProgress');
+            const status = document.getElementById('uploadStatus');
+            const percent = document.getElementById('uploadPercent');
+            progress.classList.remove('hidden');
+            status.textContent = '上传中...';
+            percent.textContent = '0%';
+
+            try {
+                if (uploadHandler.uploadMode === 'url') {
+                    const url = document.getElementById('urlInput').value;
+                    status.textContent = '添加链接...';
+                    uploadHandler.addResourceByUrl({ type, title, url, description });
+                } else if (uploadHandler.uploadMode === 'base64') {
+                    const file = document.getElementById('fileInput').files[0];
+                    status.textContent = '转换文件中...';
+                    await uploadHandler.addResourceByBase64({ file, type, title, description });
+                } else {
+                    const file = document.getElementById('fileInputCloud').files[0];
+                    status.textContent = '上传到云端...';
+
+                    // 模拟上传进度
+                    let uploadProgress = 0;
+                    const progressInterval = setInterval(() => {
+                        uploadProgress += 10;
+                        if (uploadProgress <= 90) {
+                            percent.textContent = uploadProgress + '%';
+                        }
+                    }, 200);
+
+                    await uploadHandler.addResourceByCloud({ file, type, title, description });
+
+                    clearInterval(progressInterval);
+                    percent.textContent = '100%';
+                }
+
+                alert('添加成功！');
+                document.getElementById('uploadForm').reset();
+
+                // 重置文件选择区域
+                document.getElementById('dropZoneContent').classList.remove('hidden');
+                document.getElementById('selectedFileInfo').classList.add('hidden');
+
+                renderResources();
+                updateStorageStats();
+            } catch (error) {
+                console.error('添加失败:', error);
+                alert('添加失败：' + error.message);
+            } finally {
+                progress.classList.add('hidden');
+            }
+        }
+
+        // 筛选资源
+        function filterResources(type) {
+            selectedType = type;
+            renderResources();
+
+            // 更新按钮样式
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-gradient-to-r', 'from-purple-500', 'via-blue-500', 'to-green-500', 'text-white', 'shadow-lg');
+                btn.classList.add('bg-white', 'text-gray-700');
+            });
+
+            const activeBtn = document.getElementById(`btn-${type}`);
+            if (type === 'all') {
+                activeBtn.classList.add('bg-gradient-to-r', 'from-purple-500', 'via-blue-500', 'to-green-500', 'text-white', 'shadow-lg');
+            } else {
+                activeBtn.style.background = 'linear-gradient(90deg, #8b5cf6, #3b82f6, #22c55e)';
+                activeBtn.classList.add('text-white', 'shadow-lg');
+            }
+        }
+
+        // 渲染资源列表
+        function renderResources() {
+            const container = document.getElementById('resources-container');
+            const resources = uploadHandler.getResources(selectedType);
+
+            if (resources.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 sm:py-16">
+                        <div class="text-6xl sm:text-8xl mb-4 animate-bounce">📭</div>
+                        <p class="text-gray-600 text-lg sm:text-xl">暂无资源</p>
+                        <p class="text-gray-500 text-sm sm:text-base mt-2">选择上传方式，开始添加资源吧！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    ${resources.map(resource => {
+                        const config = uploadHandler.typeConfig[resource.type];
+                        const storageModeText = {
+                            'url': '🔗 链接',
+                            'base64': '💾 本地',
+                            'cloud': '☁️ 云端'
+                        };
+                        const storageModeClass = {
+                            'url': 'bg-blue-100 text-blue-700',
+                            'base64': 'bg-green-100 text-green-700',
+                            'cloud': 'bg-purple-100 text-purple-700'
+                        };
+
+                        return `
+                            <div class="border-2 ${config.borderColor} rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all">
+                                <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <span class="text-2xl">${config.emoji}</span>
+                                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${config.textColor} ${config.bgColor}">
+                                                ${config.label}
+                                            </span>
+                                            <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-bold ${storageModeClass[resource.storageMode]}">
+                                                ${storageModeText[resource.storageMode]}
+                                            </span>
+                                        </div>
+                                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-1">${resource.title}</h3>
+                                        <p class="text-gray-600 text-sm mb-3">${resource.description || '暂无描述'}</p>
+                                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                                            <span>📅 ${new Date(resource.uploadDate).toLocaleDateString()}</span>
+                                            ${resource.size > 0 ? `<span>📦 ${uploadHandler.formatFileSize(resource.size)}</span>` : ''}
+                                            ${resource.fileName ? `<span>📄 ${resource.fileName}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="flex sm:flex-col gap-2">
+                                        <a
+                                            href="${resource.url}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="px-4 py-2 rounded-lg ${config.btnColor} text-white font-bold text-sm transition-all hover:scale-105"
+                                        >
+                                            打开
+                                        </a>
+                                        <button
+                                            onclick="deleteResource('${resource.id}')"
+                                            class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold text-sm transition-all"
+                                        >
+                                            删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // 删除资源
+        function deleteResource(id) {
+            if (confirm('确定要删除这个资源吗？')) {
+                uploadHandler.deleteResource(id);
+                renderResources();
+                updateStorageStats();
+            }
+        }
+
+        // 清空所有资源
+        function clearAllResources() {
+            if (confirm('确定要清空所有资源吗？此操作不可恢复！')) {
+                uploadHandler.clearAll();
+                renderResources();
+                updateStorageStats();
+            }
+        }
+
+        // 更新存储统计
+        function updateStorageStats() {
+            const resources = uploadHandler.getResources('all');
+
+            const cloudCount = resources.filter(r => r.storageMode === 'cloud').length;
+            const urlCount = resources.filter(r => r.storageMode === 'url').length;
+            const base64Count = resources.filter(r => r.storageMode === 'base64').length;
+
+            document.getElementById('cloudCount').textContent = cloudCount;
+            document.getElementById('urlCount').textContent = urlCount;
+            document.getElementById('base64Count').textContent = base64Count;
+        }
+    </script>
+</body>
+</html>
