@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我会洗手 - 小班健康活动</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4A9FE8',
+                        secondary: '#7ED957',
+                        accent: '#FFD166',
+                        light: '#E6F7FF',
+                        dark: '#2C5282'
+                    },
+                    fontFamily: {
+                        sans: ['Comic Sans MS', 'Arial', 'sans-serif'],
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'bubble': 'bubble 2s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        bubble: {
+                            '0%': { transform: 'scale(1)', opacity: 0.7 },
+                            '50%': { transform: 'scale(1.2)', opacity: 1 },
+                            '100%': { transform: 'scale(1)', opacity: 0.7 },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            .bubble {
+                position: absolute;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.7);
+                animation: bubble 2s ease-in-out infinite;
+            }
+            .water-drop {
+                position: absolute;
+                background-color: rgba(74, 159, 232, 0.6);
+                border-radius: 50% 0 50% 50%;
+                transform: rotate(45deg);
+                animation: drop 1s linear forwards;
+            }
+            @keyframes drop {
+                0% {
+                    transform: rotate(45deg) translateY(-20px);
+                    opacity: 1;
+                }
+                100% {
+                    transform: rotate(45deg) translateY(200px);
+                    opacity: 0;
+                }
+            }
+            .hand {
+                transition: transform 0.3s ease;
+            }
+            .hand:hover {
+                transform: scale(1.05);
+            }
+            .step-active {
+                border: 4px solid #FFD166;
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(255, 209, 102, 0.7);
+            }
+            .soap-bubble {
+                position: absolute;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.8);
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+                pointer-events: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light min-h-screen font-sans">
+    <!-- 顶部导航 -->
+    <header class="bg-primary text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-shadow flex items-center">
+                <i class="fa fa-hand-paper-o mr-2"></i> 我会洗手
+            </h1>
+            <div class="flex space-x-4">
+                <button id="home-btn" class="bg-white text-primary px-4 py-2 rounded-full font-bold hover:bg-accent transition-colors">
+                    <i class="fa fa-home mr-1"></i> 首页
+                </button>
+                <button id="help-btn" class="bg-white text-primary px-4 py-2 rounded-full font-bold hover:bg-accent transition-colors">
+                    <i class="fa fa-question-circle mr-1"></i> 帮助
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto p-4">
+        <!-- 欢迎页面 -->
+        <section id="welcome-section" class="flex flex-col items-center justify-center py-8">
+            <div class="text-center mb-8">
+                <h2 class="text-4xl font-bold text-primary mb-4 animate-float">欢迎来到洗手小课堂！</h2>
+                <p class="text-xl text-dark">小朋友们，让我们一起学习正确的洗手方法吧！</p>
+            </div>
+            
+            <div class="relative w-full max-w-2xl h-64 mb-8">
+                <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/c9d97e25ca644572ae2ff1840ee7e374~tplv-a9rns2rl98-image.image?rcl=202601071740217199BF6A3904DE761252&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1770370848&x-signature=sWFyoUil4zQk7nfvA1l9JEJ1Id0%3D" 
+                     alt="洗手池" 
+                     class="w-full h-full object-contain animate-float">
+                <div id="welcome-bubbles" class="absolute inset-0"></div>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-4">
+                <button id="steps-btn" class="bg-primary text-white text-xl px-6 py-3 rounded-full font-bold hover:bg-dark transition-colors shadow-lg flex items-center">
+                    <i class="fa fa-list-ol mr-2"></i> 学习洗手步骤
+                </button>
+                <button id="game-btn" class="bg-secondary text-white text-xl px-6 py-3 rounded-full font-bold hover:bg-dark transition-colors shadow-lg flex items-center">
+                    <i class="fa fa-gamepad mr-2"></i> 洗手小游戏
+                </button>
+                <button id="timer-btn" class="bg-accent text-dark text-xl px-6 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition-colors shadow-lg flex items-center">
+                    <i class="fa fa-clock-o mr-2"></i> 洗手计时器
+                </button>
+            </div>
+        </section>
+
+        <!-- 洗手步骤页面 -->
+        <section id="steps-section" class="hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-primary mb-2">正确洗手的7个步骤</h2>
+                <p class="text-lg text-dark">跟着步骤一起学习吧！</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="step-card bg-white rounded-xl shadow-lg p-4 cursor-pointer step-item" data-step="1">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">1</div>
+                    <img src="https://p11-doubao-search-sign.byteimg.com/labis/16c7de8d4484077e7bd03cf1027a9418~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=2aET8agKhi%2FVeiUsASZYsbjZ8TI%3D" 
+                         alt="步骤1" 
+                         class="w-full h-40 object-contain mb-2">
+                    <h3 class="text-xl font-bold text-primary">用水和肥皂</h3>
+                </div>
+                
+                <div class="step-card bg-white rounded-xl shadow-lg p-4 cursor-pointer step-item" data-step="2">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">2</div>
+                    <img src="https://p11-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/2313223085933854725~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=PzlADl5tFKCJV4%2B%2BK9rJ5UXD52M%3D" 
+                         alt="步骤2" 
+                         class="w-full h-40 object-contain mb-2">
+                    <h3 class="text-xl font-bold text-primary">手心对手心搓</h3>
+                </div>
+                
+                <div class="step-card bg-white rounded-xl shadow-lg p-4 cursor-pointer step-item" data-step="3">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">3</div>
+                    <img src="https://p26-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/1003455646436687898~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=pomij%2FmeelMplX86%2FD1DIzTG5g0%3D" 
+                         alt="步骤3" 
+                         class="w-full h-40 object-contain mb-2">
+                    <h3 class="text-xl font-bold text-primary">手指交叉搓</h3>
+                </div>
+                
+                <div class="step-card bg-white rounded-xl shadow-lg p-4 cursor-pointer step-item" data-step="4">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">4</div>
+                    <img src="https://p11-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/919839066932904071740217199BF6A3904DE761252&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1770370848&x-signature=vMoavOs7nv4XZpdkXzIWk4NreB4%3D" 
+                         alt="步骤4" 
+                         class="w-full h-40 object-contain mb-2">
+                    <h3 class="text-xl font-bold text-primary">手背对手心搓</h3>
+                </div>
+                
+                <div class="step-card bg-white rounded-xl shadow-lg p-4 cursor-pointer step-item" data-step="5">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">5</div>
+                    <img src="https://p26-doubao-search-sign.byteimg.com/labis/665d85a3c9f6391edb2b7b742f2ff6e2~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=IzpDTlSEluL0trmpfjRXwUBTFl0%3D" 
+                         alt="步骤5" 
+                         class="w-full h-40 object-contain mb-2">
+                    <h3 class="text-xl font-bold text-primary">拇指在手心转</h3>
+                </div>
+                
+                <div class="step-card bg-white rounded-xl shadow-lg p-4 cursor-pointer step-item" data-step="6">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">6</div>
+                    <img src="https://p11-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/1062548898759442522~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=OKY6bh2jd4y2RvP%2FUXUeJ49XWas%3D" 
+                         alt="步骤6" 
+                         class="w-full h-40 object-contain mb-2">
+                    <h3 class="text-xl font-bold text-primary">指尖对手心搓</h3>
+                </div>
+                
+                <div class="step-card bg-white rounded-xl shadow-lg p-4 cursor-pointer step-item" data-step="7">
+                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2">7</div>
+                    <img src="https://p26-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/962328817718132818~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=7y8cgeG3WmgBXcl9K9ayn8pf5%2B4%3D" 
+                         alt="步骤7" 
+                         class="w-full h-40 object-contain mb-2">
+                    <h3 class="text-xl font-bold text-primary">用清水冲洗干净</h3>
+                </div>
+            </div>
+            
+            <div id="step-detail" class="bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
+                <div class="flex items-center mb-4">
+                    <button id="close-step" class="bg-gray-200 hover:bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center mr-4">
+                        <i class="fa fa-times"></i>
+                    </button>
+                    <h3 id="step-title" class="text-2xl font-bold text-primary"></h3>
+                </div>
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/2 relative">
+                        <img id="step-image" src="" alt="步骤详情" class="w-full h-64 object-contain">
+                        <div id="step-animation" class="absolute inset-0 pointer-events-none"></div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <p id="step-description" class="text-lg mb-4"></p>
+                        <div class="bg-light rounded-lg p-4 mb-4">
+                            <h4 class="text-lg font-bold text-primary mb-2">洗手儿歌</h4>
+                            <p id="step-rhyme" class="text-dark text-center text-lg font-bold"></p>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button id="play-audio" class="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-dark transition-colors flex items-center">
+                                <i class="fa fa-volume-up mr-2"></i> 听一听
+                            </button>
+                            <button id="do-it" class="bg-secondary text-white px-4 py-2 rounded-lg font-bold hover:bg-dark transition-colors flex items-center">
+                                <i class="fa fa-hand-paper-o mr-2"></i> 跟我做
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button id="back-from-steps" class="bg-gray-200 text-dark px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition-colors">
+                    <i class="fa fa-arrow-left mr-2"></i> 返回首页
+                </button>
+            </div>
+        </section>
+
+        <!-- 洗手游戏页面 -->
+        <section id="game-section" class="hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-primary mb-2">洗手小游戏</h2>
+                <p class="text-lg text-dark">帮小朋友把手上的细菌都洗掉吧！</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/2">
+                        <h3 class="text-xl font-bold text-primary mb-4">游戏目标</h3>
+                        <div class="bg-light rounded-lg p-4 mb-4">
+                            <p class="text-dark mb-2">小朋友们，我们的手上有很多看不见的小细菌！</p>
+                            <p class="text-dark mb-2">让我们一起用清水、洗手液和泡泡，把它们都赶跑吧！</p>
+                            <p class="text-dark">拖动下面的物品到手上，完成洗手任务！</p>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-primary mb-4">可用物品</h3>
+                        <div class="flex flex-wrap gap-4">
+                            <div class="draggable cursor-grab bg-light p-2 rounded-lg" data-type="water">
+                                <img src="https://p11-doubao-search-sign.byteimg.com/labis/962df9671d2868d5a1270fc9bb8b7d8c~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=zRiea%2BsVfjJNqgHkPAECET%2FRmU8%3D" 
+                                     alt="水滴" 
+                                     class="w-20 h-20 object-contain">
+                                <p class="text-center font-bold text-primary">清水</p>
+                            </div>
+                            <div class="draggable cursor-grab bg-light p-2 rounded-lg" data-type="soap">
+                                <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/ed683886ec614d3f8c875c3fe36867ad~tplv-a9rns2rl98-image.image?rcl=202601071740217199BF6A3904DE761252&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1770370848&x-signature=MqYi%2B2vxAPNA78sNPE1J1jXmt9s%3D" 
+                                     alt="洗手液" 
+                                     class="w-20 h-20 object-contain">
+                                <p class="text-center font-bold text-primary">洗手液</p>
+                            </div>
+                            <div class="draggable cursor-grab bg-light p-2 rounded-lg" data-type="bubble">
+                                <img src="https://p11-doubao-search-sign.byteimg.com/labis/b2779f6b9abec216b42d8aea20c715b4~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=pBeOrWN3NUyt8a%2BSoFjRhRFYFr4%3D" 
+                                     alt="泡泡" 
+                                     class="w-20 h-20 object-contain">
+                                <p class="text-center font-bold text-primary">泡泡</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <button id="ai-voice-btn" class="bg-secondary text-white px-6 py-3 rounded-full font-bold hover:bg-dark transition-colors shadow-lg flex items-center mx-auto">
+                                <i class="fa fa-microphone mr-2"></i> 说一说洗手步骤
+                            </button>
+                            <div id="ai-feedback" class="mt-4 text-center hidden">
+                                <p class="text-lg font-bold text-primary">太棒了！你说对了！</p>
+                                <div class="flex justify-center mt-2">
+                                    <i class="fa fa-star text-accent text-2xl mx-1"></i>
+                                    <i class="fa fa-star text-accent text-2xl mx-1"></i>
+                                    <i class="fa fa-star text-accent text-2xl mx-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md:w-1/2">
+                        <div id="game-area" class="bg-light rounded-xl p-6 h-full relative">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-primary">洗手区域</h3>
+                                <div class="flex items-center">
+                                    <span class="text-dark mr-2">得分：</span>
+                                    <span id="game-score" class="text-2xl font-bold text-primary">0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="relative">
+                                <img id="game-hands" src="https://p11-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/2096361597282811916~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=W5AdQ9onG2ombvq9Yklli9r9pbQ%3D" 
+                                     alt="手" 
+                                     class="w-64 h-64 object-contain mx-auto">
+                                <div id="germs-container" class="absolute inset-0 pointer-events-none"></div>
+                                <div id="game-bubbles-container" class="absolute inset-0 pointer-events-none"></div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <div class="bg-white rounded-lg p-4 mb-4">
+                                    <h4 class="text-lg font-bold text-primary mb-2">洗手步骤挑战</h4>
+                                    <p id="game-challenge" class="text-dark">挑战：先用水淋湿手，再用洗手液搓出泡泡！</p>
+                                </div>
+                                
+                                <div class="flex justify-between">
+                                    <button id="wash-hands-btn" class="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-dark transition-colors shadow-lg flex items-center">
+                                        <i class="fa fa-refresh mr-2"></i> 开始洗手
+                                    </button>
+                                    <button id="next-challenge" class="bg-accent text-dark px-4 py-2 rounded-lg font-bold hover:bg-primary hover:text-white transition-colors shadow-lg flex items-center">
+                                        下一关 <i class="fa fa-arrow-right ml-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button id="back-from-game" class="bg-gray-200 text-dark px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition-colors">
+                    <i class="fa fa-arrow-left mr-2"></i> 返回首页
+                </button>
+            </div>
+        </section>
+
+        <!-- 洗手计时器页面 -->
+        <section id="timer-section" class="hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-primary mb-2">洗手计时器</h2>
+                <p class="text-lg text-dark">跟着《洗手歌》一起洗手，要洗够时间哦！</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+                <div class="flex flex-col items-center mb-8">
+                    <div id="timer-display" class="text-6xl font-bold text-primary mb-4">00:00</div>
+                    <div class="w-full bg-gray-200 rounded-full h-4 mb-4">
+                        <div id="timer-progress" class="bg-primary h-4 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div id="timer-status" class="text-xl font-bold text-dark">准备开始</div>
+                </div>
+                
+                <div class="flex justify-center gap-4 mb-8">
+                    <button id="start-timer" class="bg-primary text-white px-6 py-3 rounded-full font-bold hover:bg-dark transition-colors shadow-lg flex items-center">
+                        <i class="fa fa-play mr-2"></i> 开始
+                    </button>
+                    <button id="pause-timer" class="bg-gray-500 text-white px-6 py-3 rounded-full font-bold hover:bg-gray-600 transition-colors shadow-lg flex items-center hidden">
+                        <i class="fa fa-pause mr-2"></i> 暂停
+                    </button>
+                    <button id="reset-timer" class="bg-accent text-dark px-6 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition-colors shadow-lg flex items-center">
+                        <i class="fa fa-refresh mr-2"></i> 重新开始
+                    </button>
+                </div>
+                
+                <div class="bg-light rounded-lg p-4">
+                    <h3 class="text-xl font-bold text-primary mb-2">洗手歌歌词</h3>
+                    <div id="lyrics" class="text-dark">
+                        <p class="mb-2">鼓鼓掌，拍拍手，</p>
+                        <p class="mb-2">讲卫生呀勤洗手，</p>
+                        <p class="mb-2">大家一起来唱歌，</p>
+                        <p class="mb-2">互相提醒小朋友，</p>
+                        <p class="mb-4">提醒小朋友。</p>
+                        
+                        <p class="mb-2">进屋洗，饭前洗，</p>
+                        <p class="mb-2">手背洗呀手心洗，</p>
+                        <p class="mb-2">肥皂搓搓来清理，</p>
+                        <p class="mb-2">养成习惯靠自己，</p>
+                        <p class="mb-4">习惯靠自己。</p>
+                        
+                        <p class="mb-2">拍皮球，画图画，</p>
+                        <p class="mb-2">捉迷藏呀玩游戏，</p>
+                        <p class="mb-2">回家洗手别忘记，</p>
+                        <p class="mb-2">偷懒只能害自己，</p>
+                        <p>只能害自己。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-8">
+                <button id="back-from-timer" class="bg-gray-200 text-dark px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition-colors">
+                    <i class="fa fa-arrow-left mr-2"></i> 返回首页
+                </button>
+            </div>
+        </section>
+
+        <!-- 帮助页面 -->
+        <section id="help-section" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+                <div class="flex items-center mb-6">
+                    <button id="close-help" class="bg-gray-200 hover:bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center mr-4">
+                        <i class="fa fa-times"></i>
+                    </button>
+                    <h2 class="text-3xl font-bold text-primary">使用帮助</h2>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-dark mb-2">如何使用本应用</h3>
+                    <ul class="list-disc pl-6 space-y-2 text-dark">
+                        <li>点击"学习洗手步骤"可以查看正确的洗手方法</li>
+                        <li>点击"洗手小游戏"可以玩互动洗手游戏</li>
+                        <li>点击"洗手计时器"可以跟着歌曲一起洗手</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-dark mb-2">互动说明</h3>
+                    <div class="flex items-center mb-2">
+                        <i class="fa fa-hand-pointer-o text-primary text-xl mr-2"></i>
+                        <span class="text-dark">点击：选择项目或开始游戏</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                        <i class="fa fa-arrows text-primary text-xl mr-2"></i>
+                        <span class="text-dark">拖动：移动水滴和泡泡到手上</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fa fa-microphone text-primary text-xl mr-2"></i>
+                        <span class="text-dark">语音：点击麦克风按钮说出洗手步骤</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-dark mb-2">适用年龄段</h3>
+                    <p class="text-dark">本应用适合3-6岁的小班幼儿使用，家长可以陪同指导。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 底部信息 -->
+    <footer class="bg-primary text-white p-4 mt-8">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-lg font-bold">我会洗手 - 小班健康活动</p>
+                </div>
+                <div class="flex flex-col items-center md:items-end">
+                    <div class="flex items-center mb-2">
+                        <i class="fa fa-child mr-2"></i>
+                        <span>适用年龄段：3-6岁</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        <span>互动说明：点击图标查看详细使用方法</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 页面导航
+        document.addEventListener('DOMContentLoaded', function() {
+            // 页面切换
+            const sections = {
+                'welcome': document.getElementById('welcome-section'),
+                'steps': document.getElementById('steps-section'),
+                'game': document.getElementById('game-section'),
+                'timer': document.getElementById('timer-section'),
+                'help': document.getElementById('help-section')
+            };
+            
+            function showSection(sectionId) {
+                Object.keys(sections).forEach(key => {
+                    sections[key].classList.add('hidden');
+                });
+                sections[sectionId].classList.remove('hidden');
+            }
+            
+            // 导航按钮事件
+            document.getElementById('home-btn').addEventListener('click', () => showSection('welcome'));
+            document.getElementById('help-btn').addEventListener('click', () => showSection('help'));
+            document.getElementById('close-help').addEventListener('click', () => showSection('welcome'));
+            
+            document.getElementById('steps-btn').addEventListener('click', () => showSection('steps'));
+            document.getElementById('game-btn').addEventListener('click', () => showSection('game'));
+            document.getElementById('timer-btn').addEventListener('click', () => showSection('timer'));
+            
+            document.getElementById('back-from-steps').addEventListener('click', () => showSection('welcome'));
+            document.getElementById('back-from-game').addEventListener('click', () => showSection('welcome'));
+            document.getElementById('back-from-timer').addEventListener('click', () => showSection('welcome'));
+            
+            // 欢迎页面气泡动画
+            createWelcomeBubbles();
+            
+            // 洗手步骤功能
+            initStepsSection();
+            
+            // 洗手游戏功能
+            initGameSection();
+            
+            // 洗手计时器功能
+            initTimerSection();
+        });
+        
+        // 欢迎页面气泡动画
+        function createWelcomeBubbles() {
+            const container = document.getElementById('welcome-bubbles');
+            const bubbleCount = 15;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                
+                // 随机大小、位置和动画延迟
+                const size = Math.random() * 30 + 10;
+                const left = Math.random() * 100;
+                const delay = Math.random() * 5;
+                
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${left}%`;
+                bubble.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(bubble);
+            }
+        }
+        
+        // 洗手步骤功能
+        function initStepsSection() {
+            const stepItems = document.querySelectorAll('.step-item');
+            const stepDetail = document.getElementById('step-detail');
+            const closeStep = document.getElementById('close-step');
+            const stepTitle = document.getElementById('step-title');
+            const stepImage = document.getElementById('step-image');
+            const stepDescription = document.getElementById('step-description');
+            const stepRhyme = document.getElementById('step-rhyme');
+            const stepAnimation = document.getElementById('step-animation');
+            const playAudio = document.getElementById('play-audio');
+            const doIt = document.getElementById('do-it');
+            
+            // 步骤数据
+            const stepData = [
+                {
+                    title: "第一步：打开水龙头，淋湿小小手",
+                    image: "https://p11-doubao-search-sign.byteimg.com/labis/16c7de8d4484077e7bd03cf1027a9418~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=2aET8agKhi%2FVeiUsASZYsbjZ8TI%3D",
+                    description: "小朋友们，先找到水龙头，轻轻拧开它，让水流出来淋湿我们的小小手。然后取一点香香的洗手液，就像小云朵一样落在我们的手心！",
+                    rhyme: "水龙头，哗哗流，小小手儿洗干净～",
+                    animation: "water",
+                    audio: "打开水龙头，水哗啦啦流出来，把我们的小小手淋湿吧！"
+                },
+                {
+                    title: "第二步：手心搓手心，搓出小泡泡",
+                    image: "https://p11-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/2313223085933854725~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=PzlADl5tFKCJV4%2B%2BK9rJ5UXD52M%3D",
+                    description: "现在，让我们的两只小手手心对着手心，像鼓掌一样搓一搓。看！洗手液变成了好多好多的小泡泡，就像魔法一样！",
+                    rhyme: "手心搓手心，搓出小泡泡，细菌无处逃～",
+                    animation: "bubble",
+                    audio: "手心对着手心，搓搓搓，搓出好多小泡泡！"
+                },
+                {
+                    title: "第三步：手指交叉搓，指缝要干净",
+                    image: "https://p26-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/1003455646436687898~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=pomij%2FmeelMplX86%2FD1DIzTG5g0%3D",
+                    description: "接下来，让我们的手指像小火车一样交叉起来，然后上下揉搓。这样可以把藏在手指缝里的小细菌都赶跑哦！",
+                    rhyme: "手指交叉搓，指缝要干净，细菌都跑掉～",
+                    animation: "cross",
+                    audio: "手指交叉，上下揉搓，把指缝里的小细菌都赶跑！"
+                },
+                {
+                    title: "第四步：手背搓手心，前后都要洗",
+                    image: "https://p11-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/919839066932904071740217199BF6A3904DE761252&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1770370848&x-signature=vMoavOs7nv4XZpdkXzIWk4NreB4%3D",
+                    description: "现在，让我们一只手的手心搓另一只手的手背，就像给小手背挠痒痒一样。然后交换，让两只手的手背都变得干干净净！",
+                    rhyme: "手背搓手心，前后都要洗，小手香喷喷～",
+                    animation: "back",
+                    audio: "手心搓手背，手背搓手心，前后都要洗干净！"
+                },
+                {
+                    title: "第五步：拇指转圈圈，拇指也要洗",
+                    image: "https://p26-doubao-search-sign.byteimg.com/labis/665d85a3c9f6391edb2b7b742f2ff6e2~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=IzpDTlSEluL0trmpfjRXwUBTFl0%3D",
+                    description: "看！我们的大拇指像不像一个小方向盘？让我们用另一只手抓住它，然后像开车一样转圈圈。这样可以把大拇指周围的细菌都洗掉！",
+                    rhyme: "拇指转圈圈，就像开汽车，细菌都吓跑～",
+                    animation: "thumb",
+                    audio: "大拇指，转圈圈，就像开汽车，滴滴滴！"
+                },
+                {
+                    title: "第六步：指尖搓手心，指甲缝要洗",
+                    image: "https://p11-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/1062548898759442522~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=OKY6bh2jd4y2RvP%2FUXUeJ49XWas%3D",
+                    description: "小朋友们，我们的指尖和指甲缝里也会藏着小细菌哦！让我们把指尖放在另一只手的手心里，像挠痒痒一样搓一搓，把它们都赶跑！",
+                    rhyme: "指尖搓手心，指甲缝要洗，干净又卫生～",
+                    animation: "fingertip",
+                    audio: "指尖搓手心，指甲缝要洗干净，小细菌无处藏！"
+                },
+                {
+                    title: "第七步：清水冲干净，小手真干净",
+                    image: "https://p26-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/962328817718132818~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1783330830&x-signature=7y8cgeG3WmgBXcl9K9ayn8pf5%2B4%3D",
+                    description: "最后一步啦！打开水龙头，让清水把我们手上的泡泡都冲干净。记得要冲仔细哦，不要留下一点点泡泡！",
+                    rhyme: "清水冲干净，泡泡全冲走，小手真干净～",
+                    animation: "rinse",
+                    audio: "清水哗哗流，泡泡全冲走，小手洗得真干净！"
+                }
+            ];
+            
+            // 点击步骤卡片显示详情
+            stepItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const stepIndex = parseInt(item.dataset.step) - 1;
+                    const step = stepData[stepIndex];
+                    
+                    stepTitle.textContent = step.title;
+                    stepImage.src = step.image;
+                    stepDescription.textContent = step.description;
+                    stepRhyme.textContent = step.rhyme;
+                    
+                    // 清除之前的动画
+                    stepAnimation.innerHTML = '';
+                    
+                    // 添加动画
+                    createStepAnimation(step.animation);
+                    
+                    stepDetail.classList.remove('hidden');
+                    item.classList.add('step-active');
+                    
+                    // 滚动到详情区域
+                    stepDetail.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+            
+            // 关闭详情
+            closeStep.addEventListener('click', () => {
+                stepDetail.classList.add('hidden');
+                stepItems.forEach(item => item.classList.remove('step-active'));
+            });
+            
+            // 播放音频
+            playAudio.addEventListener('click', () => {
+                const activeStep = document.querySelector('.step-active');
+                if (activeStep) {
+                    const stepIndex = parseInt(activeStep.dataset.step) - 1;
+                    const step = stepData[stepIndex];
+                    
+                    // 使用Web Speech API进行语音合成
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(step.audio);
+                        utterance.lang = 'zh-CN';
+                        utterance.rate = 0.9; // 稍微放慢语速
+                        utterance.pitch = 1.2; // 提高音调，更适合幼儿
+                        speechSynthesis.speak(utterance);
+                    } else {
+                        alert(step.audio);
+                    }
+                }
+            });
+            
+            // 跟我做
+            doIt.addEventListener('click', () => {
+                const activeStep = document.querySelector('.step-active');
+                if (activeStep) {
+                    const stepIndex = parseInt(activeStep.dataset.step) - 1;
+                    const step = stepData[stepIndex];
+                    
+                    // 播放音频
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(step.audio);
+                        utterance.lang = 'zh-CN';
+                        utterance.rate = 0.9;
+                        utterance.pitch = 1.2;
+                        speechSynthesis.speak(utterance);
+                    }
+                    
+                    // 重新播放动画
+                    stepAnimation.innerHTML = '';
+                    createStepAnimation(step.animation);
+                    
+                    // 添加提示
+                    const instruction = document.createElement('div');
+                    instruction.className = 'absolute bottom-4 left-0 right-0 text-center';
+                    instruction.innerHTML = `
+                        <div class="bg-primary text-white px-4 py-2 rounded-lg inline-block">
+                            小朋友，跟我一起做！
+                        </div>
+                    `;
+                    stepAnimation.appendChild(instruction);
+                }
+            });
+            
+            // 创建步骤动画
+            function createStepAnimation(animationType) {
+                stepAnimation.innerHTML = '';
+                
+                switch (animationType) {
+                    case 'water':
+                        // 水滴动画
+                        for (let i = 0; i < 10; i++) {
+                            const drop = document.createElement('div');
+                            drop.className = 'absolute bg-primary rounded-full';
+                            drop.style.width = `${Math.random() * 10 + 5}px`;
+                            drop.style.height = `${Math.random() * 15 + 10}px`;
+                            drop.style.left = `${Math.random() * 80 + 10}%`;
+                            drop.style.top = '-20px';
+                            drop.style.opacity = '0.7';
+                            drop.style.animation = `drop ${Math.random() * 0.5 + 0.5}s linear ${i * 0.1}s infinite`;
+                            stepAnimation.appendChild(drop);
+                        }
+                        break;
+                        
+                    case 'bubble':
+                        // 泡泡动画
+                        for (let i = 0; i < 15; i++) {
+                            const bubble = document.createElement('div');
+                            bubble.className = 'absolute bg-white rounded-full';
+                            bubble.style.width = `${Math.random() * 20 + 10}px`;
+                            bubble.style.height = `${Math.random() * 20 + 10}px`;
+                            bubble.style.left = `${Math.random() * 80 + 10}%`;
+                            bubble.style.top = `${Math.random() * 80 + 10}%`;
+                            bubble.style.opacity = '0.8';
+                            bubble.style.boxShadow = '0 0 5px rgba(255, 255, 255, 0.8)';
+                            bubble.style.animation = `bubble ${Math.random() * 2 + 1}s ease-in-out ${i * 0.2}s infinite`;
+                            stepAnimation.appendChild(bubble);
+                        }
+                        break;
+                        
+                    case 'cross':
+                        // 手指交叉动画
+                        const cross = document.createElement('div');
+                        cross.className = 'absolute inset-0 flex items-center justify-center';
+                        cross.innerHTML = `
+                            <div class="text-6xl text-primary animate-pulse">
+                                <i class="fa fa-hand-paper-o"></i> + <i class="fa fa-hand-paper-o fa-rotate-180"></i>
+                            </div>
+                        `;
+                        stepAnimation.appendChild(cross);
+                        break;
+                        
+                    case 'back':
+                        // 手背搓手心动画
+                        const back = document.createElement('div');
+                        back.className = 'absolute inset-0 flex items-center justify-center';
+                        back.innerHTML = `
+                            <div class="text-6xl text-primary animate-bounce">
+                                <i class="fa fa-hand-paper-o"></i> <i class="fa fa-exchange"></i> <i class="fa fa-hand-paper-o fa-flip-horizontal"></i>
+                            </div>
+                        `;
+                        stepAnimation.appendChild(back);
+                        break;
+                        
+                    case 'thumb':
+                        // 拇指转圈动画
+                        const thumb = document.createElement('div');
+                        thumb.className = 'absolute inset-0 flex items-center justify-center';
+                        thumb.innerHTML = `
+                            <div class="text-6xl text-primary">
+                                <i class="fa fa-hand-pointer-o animate-spin" style="animation-duration: 2s;"></i>
+                            </div>
+                        `;
+                        stepAnimation.appendChild(thumb);
+                        break;
+                        
+                    case 'fingertip':
+                        // 指尖搓手心动画
+                        const fingertip = document.createElement('div');
+                        fingertip.className = 'absolute inset-0 flex items-center justify-center';
+                        fingertip.innerHTML = `
+                            <div class="text-6xl text-primary animate-pulse">
+                                <i class="fa fa-child"></i> <i class="fa fa-arrows-h"></i> <i class="fa fa-hand-paper-o"></i>
+                            </div>
+                        `;
+                        stepAnimation.appendChild(fingertip);
+                        break;
+                        
+                    case 'rinse':
+                        // 清水冲洗动画
+                        for (let i = 0; i < 20; i++) {
+                            const drop = document.createElement('div');
+                            drop.className = 'absolute bg-blue-200 rounded-full';
+                            drop.style.width = `${Math.random() * 8 + 3}px`;
+                            drop.style.height = `${Math.random() * 12 + 8}px`;
+                            drop.style.left = `${Math.random() * 100}%`;
+                            drop.style.top = '-10px';
+                            drop.style.opacity = '0.6';
+                            drop.style.animation = `drop ${Math.random() * 0.4 + 0.3}s linear ${i * 0.05}s infinite`;
+                            stepAnimation.appendChild(drop);
+                        }
+                        break;
+                }
+            }
+        }
+        
+        // 洗手游戏功能
+        function initGameSection() {
+            const draggables = document.querySelectorAll('.draggable');
+            const gameArea = document.getElementById('game-area');
+            const gameHands = document.getElementById('game-hands');
+            const bubblesContainer = document.getElementById('game-bubbles-container');
+            const germsContainer = document.getElementById('germs-container');
+            const washHandsBtn = document.getElementById('wash-hands-btn');
+            const aiVoiceBtn = document.getElementById('ai-voice-btn');
+            const aiFeedback = document.getElementById('ai-feedback');
+            const gameScore = document.getElementById('game-score');
+            const gameChallenge = document.getElementById('game-challenge');
+            const nextChallengeBtn = document.getElementById('next-challenge');
+            
+            let draggedItem = null;
+            let score = 0;
+            let currentChallenge = 0;
+            let germs = [];
+            
+            // 挑战数据
+            const challenges = [
+                {
+                    text: "挑战：先用水淋湿手，再用洗手液搓出泡泡！",
+                    successMessage: "太棒了！你完成了第一步挑战！",
+                    requiredActions: ["water", "soap"]
+                },
+                {
+                    text: "挑战：用泡泡搓洗手指缝，把细菌都赶跑！",
+                    successMessage: "手指缝洗得真干净！",
+                    requiredActions: ["bubble", "bubble", "bubble"]
+                },
+                {
+                    text: "挑战：按照正确的顺序洗手：水→洗手液→泡泡→水！",
+                    successMessage: "你已经掌握了正确的洗手顺序！",
+                    requiredActions: ["water", "soap", "bubble", "water"]
+                }
+            ];
+            
+            // 初始化游戏
+            function initGame() {
+                // 重置分数
+                score = 0;
+                gameScore.textContent = score;
+                
+                // 重置挑战
+                currentChallenge = 0;
+                updateChallenge();
+                
+                // 创建细菌
+                createGerms();
+                
+                // 清空效果
+                bubblesContainer.innerHTML = '';
+            }
+            
+            // 更新挑战
+            function updateChallenge() {
+                if (currentChallenge < challenges.length) {
+                    gameChallenge.textContent = challenges[currentChallenge].text;
+                } else {
+                    gameChallenge.textContent = "恭喜你完成了所有挑战！你是洗手小能手！";
+                    nextChallengeBtn.disabled = true;
+                    nextChallengeBtn.classList.add('opacity-50');
+                }
+            }
+            
+            // 创建细菌
+            function createGerms() {
+                germsContainer.innerHTML = '';
+                germs = [];
+                
+                const germCount = 10;
+                
+                for (let i = 0; i < germCount; i++) {
+                    const germ = document.createElement('div');
+                    germ.className = 'absolute';
+                    
+                    // 随机位置
+                    const left = Math.random() * 80 + 10;
+                    const top = Math.random() * 80 + 10;
+                    
+                    germ.style.left = `${left}%`;
+                    germ.style.top = `${top}%`;
+                    
+                    // 随机细菌样式
+                    const germTypes = [
+                        '<i class="fa fa-bug text-red-500 text-2xl animate-bounce"></i>',
+                        '<i class="fa fa-heartbeat text-red-500 text-2xl animate-pulse"></i>',
+                        '<i class="fa fa-asterisk text-red-500 text-2xl animate-spin"></i>'
+                    ];
+                    
+                    germ.innerHTML = germTypes[Math.floor(Math.random() * germTypes.length)];
+                    
+                    germsContainer.appendChild(germ);
+                    germs.push({
+                        element: germ,
+                        x: left,
+                        y: top,
+                        isClean: false
+                    });
+                }
+            }
+            
+            // 检查是否完成当前挑战
+            function checkChallenge(action) {
+                if (currentChallenge >= challenges.length) return;
+                
+                const challenge = challenges[currentChallenge];
+                const requiredActions = [...challenge.requiredActions];
+                
+                // 检查是否完成所有必需动作
+                let allActionsCompleted = true;
+                for (const action of requiredActions) {
+                    if (!germs.some(germ => germ.lastAction === action)) {
+                        allActionsCompleted = false;
+                        break;
+                    }
+                }
+                
+                if (allActionsCompleted) {
+                    // 完成挑战
+                    score += 50;
+                    gameScore.textContent = score;
+                    
+                    // 显示成功消息
+                    showMessage(challenge.successMessage, 'success');
+                    
+                    // 进入下一个挑战
+                    currentChallenge++;
+                    updateChallenge();
+                }
+            }
+            
+            // 显示消息
+            function showMessage(text, type = 'info') {
+                const message = document.createElement('div');
+                message.className = `fixed top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg text-white font-bold text-xl z-50 ${
+                    type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+                }`;
+                message.textContent = text;
+                
+                document.body.appendChild(message);
+                
+                // 3秒后移除
+                setTimeout(() => {
+                    message.remove();
+                }, 3000);
+            }
+            
+            // 设置拖拽功能
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', function(e) {
+                    draggedItem = this;
+                    setTimeout(() => this.style.opacity = '0.5', 0);
+                });
+                
+                draggable.addEventListener('dragend', function() {
+                    this.style.opacity = '1';
+                });
+                
+                // 使元素可拖拽
+                draggable.setAttribute('draggable', 'true');
+            });
+            
+            // 游戏区域接收拖拽
+            gameArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            
+            gameArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (draggedItem) {
+                    const type = draggedItem.dataset.type;
+                    const x = e.clientX - gameArea.getBoundingClientRect().left;
+                    const y = e.clientY - gameArea.getBoundingClientRect().top;
+                    
+                    createEffect(type, x, y);
+                    
+                    // 添加动画效果
+                    if (type === 'water') {
+                        createWaterDrops();
+                        cleanGerms(type);
+                    } else if (type === 'soap') {
+                        createSoapEffect();
+                        cleanGerms(type);
+                    } else if (type === 'bubble') {
+                        createSoapBubbles();
+                        cleanGerms(type);
+                    }
+                    
+                    // 记录最后动作
+                    germs.forEach(germ => {
+                        germ.lastAction = type;
+                    });
+                    
+                    // 检查挑战
+                    checkChallenge(type);
+                }
+            });
+            
+            // 创建效果
+            function createEffect(type, x, y) {
+                const effect = document.createElement('div');
+                effect.style.position = 'absolute';
+                effect.style.left = `${x}px`;
+                effect.style.top = `${y}px`;
+                effect.style.zIndex = '10';
+                
+                if (type === 'water') {
+                    effect.innerHTML = '<i class="fa fa-tint text-primary text-3xl"></i>';
+                } else if (type === 'soap') {
+                    effect.innerHTML = '<i class="fa fa-certificate text-white text-3xl"></i>';
+                } else if (type === 'bubble') {
+                    effect.innerHTML = '<i class="fa fa-circle-o text-white text-3xl"></i>';
+                }
+                
+                gameArea.appendChild(effect);
+                
+                // 添加动画
+                gsap.to(effect, {
+                    y: -50,
+                    opacity: 0,
+                    duration: 1,
+                    onComplete: () => effect.remove()
+                });
+            }
+            
+            // 创建水滴效果
+            function createWaterDrops() {
+                const dropCount = 15;
+                
+                for (let i = 0; i < dropCount; i++) {
+                    const drop = document.createElement('div');
+                    drop.classList.add('water-drop');
+                    
+                    const size = Math.random() * 10 + 5;
+                    const left = Math.random() * 100;
+                    
+                    drop.style.width = `${size}px`;
+                    drop.style.height = `${size}px`;
+                    drop.style.left = `${left}%`;
+                    drop.style.top = '-20px';
+                    
+                    bubblesContainer.appendChild(drop);
+                    
+                    // 动画结束后移除
+                    setTimeout(() => drop.remove(), 1000);
+                }
+            }
+            
+            // 创建洗手液效果
+            function createSoapEffect() {
+                const soap = document.createElement('div');
+                soap.className = 'absolute inset-0 flex items-center justify-center';
+                soap.innerHTML = `
+                    <div class="bg-blue-100 rounded-full w-40 h-40 opacity-70 animate-pulse"></div>
+                `;
+                
+                bubblesContainer.appendChild(soap);
+                
+                // 动画结束后移除
+                setTimeout(() => soap.remove(), 2000);
+            }
+            
+            // 创建肥皂泡效果
+            function createSoapBubbles() {
+                const bubbleCount = 20;
+                
+                for (let i = 0; i < bubbleCount; i++) {
+                    const bubble = document.createElement('div');
+                    bubble.classList.add('soap-bubble');
+                    
+                    const size = Math.random() * 20 + 10;
+                    const left = Math.random() * 100;
+                    const top = Math.random() * 50 + 20;
+                    const delay = Math.random() * 2;
+                    const duration = Math.random() * 3 + 2;
+                    
+                    bubble.style.width = `${size}px`;
+                    bubble.style.height = `${size}px`;
+                    bubble.style.left = `${left}%`;
+                    bubble.style.top = `${top}%`;
+                    bubble.style.animationDelay = `${delay}s`;
+                    bubble.style.animationDuration = `${duration}s`;
+                    
+                    bubblesContainer.appendChild(bubble);
+                    
+                    // 动画结束后移除
+                    setTimeout(() => bubble.remove(), (delay + duration) * 1000);
+                }
+            }
+            
+            // 清洁细菌
+            function cleanGerms(actionType) {
+                let cleanedCount = 0;
+                
+                germs.forEach(germ => {
+                    if (!germ.isClean) {
+                        // 根据不同的动作类型，有不同的清洁概率
+                        let cleanProbability = 0;
+                        
+                        switch (actionType) {
+                            case 'water':
+                                cleanProbability = 0.2; // 水只能清洁20%的细菌
+                                break;
+                            case 'soap':
+                                cleanProbability = 0.4; // 洗手液可以清洁40%的细菌
+                                break;
+                            case 'bubble':
+                                cleanProbability = 0.6; // 泡泡可以清洁60%的细菌
+                                break;
+                        }
+                        
+                        if (Math.random() < cleanProbability) {
+                            // 清洁成功
+                            germ.isClean = true;
+                            germ.element.innerHTML = '<i class="fa fa-check-circle text-green-500 text-2xl"></i>';
+                            
+                            // 添加动画
+                            gsap.to(germ.element, {
+                                scale: 1.5,
+                                opacity: 0,
+                                duration: 0.5,
+                                onComplete: () => germ.element.remove()
+                            });
+                            
+                            cleanedCount++;
+                        }
+                    }
+                });
+                
+                // 更新分数
+                if (cleanedCount > 0) {
+                    score += cleanedCount * 10;
+                    gameScore.textContent = score;
+                    
+                    // 显示清洁消息
+                    if (cleanedCount === 1) {
+                        showMessage(`你清洁了1个细菌！`, 'success');
+                    } else {
+                        showMessage(`你清洁了${cleanedCount}个细菌！`, 'success');
+                    }
+                }
+                
+                // 检查是否所有细菌都被清洁
+                const remainingGerms = germs.filter(germ => !germ.isClean);
+                if (remainingGerms.length === 0) {
+                    showMessage('太棒了！所有细菌都被你赶跑了！', 'success');
+                    
+                    // 重新创建细菌
+                    setTimeout(createGerms, 2000);
+                }
+            }
+            
+            // 洗手按钮
+            washHandsBtn.addEventListener('click', () => {
+                // 清空所有效果
+                bubblesContainer.innerHTML = '';
+                
+                // 创建洗手动画
+                createWaterDrops();
+                setTimeout(createSoapEffect, 500);
+                setTimeout(createSoapBubbles, 1000);
+                setTimeout(createWaterDrops, 2000);
+                
+                // 添加手的动画
+                gsap.to(gameHands, {
+                    scale: 1.1,
+                    rotation: 5,
+                    duration: 0.5,
+                    yoyo: true,
+                    repeat: 5,
+                    ease: "power1.inOut"
+                });
+                
+                // 清洁所有细菌
+                germs.forEach(germ => {
+                    if (!germ.isClean) {
+                        germ.isClean = true;
+                        germ.element.innerHTML = '<i class="fa fa-check-circle text-green-500 text-2xl"></i>';
+                        
+                        // 添加动画
+                        gsap.to(germ.element, {
+                            scale: 1.5,
+                            opacity: 0,
+                            duration: 0.5,
+                            delay: Math.random() * 2,
+                            onComplete: () => germ.element.remove()
+                        });
+                    }
+                });
+                
+                // 更新分数
+                score += 100;
+                gameScore.textContent = score;
+                
+                // 显示完成消息
+                setTimeout(() => {
+                    showMessage('太棒了！你的小手洗得真干净！', 'success');
+                    
+                    // 重新创建细菌
+                    setTimeout(createGerms, 1000);
+                }, 3000);
+            });
+            
+            // AI语音识别（模拟）
+            aiVoiceBtn.addEventListener('click', () => {
+                aiVoiceBtn.disabled = true;
+                aiVoiceBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> 正在聆听...';
+                
+                // 模拟语音识别过程
+                setTimeout(() => {
+                    aiFeedback.classList.remove('hidden');
+                    aiVoiceBtn.innerHTML = '<i class="fa fa-microphone mr-2"></i> 再说一次';
+                    aiVoiceBtn.disabled = false;
+                    
+                    // 增加分数
+                    score += 20;
+                    gameScore.textContent = score;
+                    
+                    // 5秒后隐藏反馈
+                    setTimeout(() => {
+                        aiFeedback.classList.add('hidden');
+                    }, 5000);
+                }, 3000);
+            });
+            
+            // 下一关按钮
+            nextChallengeBtn.addEventListener('click', () => {
+                if (currentChallenge < challenges.length) {
+                    currentChallenge++;
+                    updateChallenge();
+                    
+                    // 增加分数
+                    score += 30;
+                    gameScore.textContent = score;
+                    
+                    showMessage(`开始第${currentChallenge + 1}个挑战！`, 'info');
+                }
+            });
+            
+            // 初始化游戏
+            initGame();
+        }
+        
+        // 洗手计时器功能
+        function initTimerSection() {
+            const timerDisplay = document.getElementById('timer-display');
+            const timerProgress = document.getElementById('timer-progress');
+            const timerStatus = document.getElementById('timer-status');
+            const startTimer = document.getElementById('start-timer');
+            const pauseTimer = document.getElementById('pause-timer');
+            const resetTimer = document.getElementById('reset-timer');
+            
+            let timerInterval;
+            let seconds = 0;
+            const totalSeconds = 40; // 洗手歌时长约40秒
+            
+            // 更新计时器显示
+            function updateTimerDisplay() {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+                
+                // 更新进度条
+                const progress = (seconds / totalSeconds) * 100;
+                timerProgress.style.width = `${progress}%`;
+                
+                // 更新状态
+                if (seconds === 0) {
+                    timerStatus.textContent = '准备开始';
+                } else if (seconds < totalSeconds) {
+                    timerStatus.textContent = '正在洗手';
+                } else {
+                    timerStatus.textContent = '洗手完成！';
+                    clearInterval(timerInterval);
+                    startTimer.classList.remove('hidden');
+                    pauseTimer.classList.add('hidden');
+                }
+            }
+            
+            // 开始计时器
+            startTimer.addEventListener('click', () => {
+                startTimer.classList.add('hidden');
+                pauseTimer.classList.remove('hidden');
+                
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    updateTimerDisplay();
+                }, 1000);
+            });
+            
+            // 暂停计时器
+            pauseTimer.addEventListener('click', () => {
+                clearInterval(timerInterval);
+                pauseTimer.classList.add('hidden');
+                startTimer.classList.remove('hidden');
+                timerStatus.textContent = '已暂停';
+            });
+            
+            // 重置计时器
+            resetTimer.addEventListener('click', () => {
+                clearInterval(timerInterval);
+                seconds = 0;
+                updateTimerDisplay();
+                startTimer.classList.remove('hidden');
+                pauseTimer.classList.add('hidden');
+            });
+            
+            // 初始化显示
+            updateTimerDisplay();
+        }
+    </script>
+</body>
+</html>
