@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="幼儿教育资源包 - 专为3-6岁儿童设计的教学资源库，包含视频微课、PPT课件、AI互动三大模块">
+    <meta name="keywords" content="幼儿教育,儿童教学,视频微课,PPT课件,AI互动,3-6岁儿童">
+    <title>幼儿教育资源包 - 3-6岁儿童教学资源库</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-bounce { animation: bounce 1s infinite; }
+        .animate-pulse { animation: pulse 2s infinite; }
+        .gradient-text {
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        /* 移动端优化 */
+        @media (max-width: 640px) {
+            .hero-title {
+                font-size: 2rem !important;
+            }
+            .hero-emoji {
+                font-size: 2.5rem !important;
+            }
+        }
+        /* 平板优化 */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-green-50">
+    <!-- 装饰性元素 -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-10 left-10 text-6xl animate-bounce hero-emoji">🎬</div>
+        <div class="absolute top-20 right-20 text-5xl animate-pulse hero-emoji">📊</div>
+        <div class="absolute bottom-20 left-20 text-5xl animate-bounce hero-emoji" style="animation-delay: 0.5s">🤖</div>
+        <div class="absolute bottom-10 right-10 text-6xl animate-pulse hero-emoji" style="animation-delay: 1s">🌟</div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <!-- 头部：标题和主题介绍 -->
+        <div class="mb-12 text-center">
+            <div class="mb-4 flex justify-center gap-4 hero-emoji">
+                <span class="animate-bounce" style="animation-delay: 0s">🎬</span>
+                <span class="animate-bounce" style="animation-delay: 0.1s">📊</span>
+                <span class="animate-bounce" style="animation-delay: 0.2s">🤖</span>
+            </div>
+            <h1 class="mb-4 text-4xl font-bold gradient-text hero-title">
+                幼儿教育资源包
+            </h1>
+            <p class="mx-auto max-w-3xl text-lg text-gray-700 sm:text-base">
+                专为3-6岁儿童设计的教学资源库！三大技术模块：视频微课、PPT课件、AI互动，
+                帮助孩子快乐学习、健康成长！🌈
+            </p>
+        </div>
+
+        <!-- 资源类型筛选 -->
+        <div class="mb-8 flex flex-wrap items-center justify-center gap-3">
+            <button
+                onclick="filterResources('all')"
+                id="btn-all"
+                class="filter-btn px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 text-white shadow-lg text-sm sm:text-base"
+            >
+                📦 全部资源
+            </button>
+            <button
+                onclick="filterResources('video')"
+                id="btn-video"
+                class="filter-btn px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold transition-all duration-200 transform hover:scale-105 bg-white text-gray-700 hover:shadow-md text-sm sm:text-base"
+            >
+                🎬 视频微课
+            </button>
+            <button
+                onclick="filterResources('ppt')"
+                id="btn-ppt"
+                class="filter-btn px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold transition-all duration-200 transform hover:scale-105 bg-white text-gray-700 hover:shadow-md text-sm sm:text-base"
+            >
+                📊 PPT课件
+            </button>
+            <button
+                onclick="filterResources('ai')"
+                id="btn-ai"
+                class="filter-btn px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold transition-all duration-200 transform hover:scale-105 bg-white text-gray-700 hover:shadow-md text-sm sm:text-base"
+            >
+                🤖 AI互动
+            </button>
+        </div>
+
+        <!-- 资源卡片网格 -->
+        <div class="mb-16" id="resources-container">
+            <div class="flex flex-col items-center justify-center rounded-3xl bg-white p-8 sm:p-16 shadow-xl">
+                <div class="mb-6 text-6xl sm:text-8xl animate-bounce hero-emoji">📭</div>
+                <h3 class="mb-3 text-xl sm:text-2xl font-bold text-gray-900">
+                    演示版本
+                </h3>
+                <p class="mb-6 text-center text-gray-600 text-sm sm:text-base">
+                    这是静态 HTML 演示版本，暂无实际资源。<br>
+                    完整功能请使用 Next.js 版本。
+                </p>
+                <div class="grid gap-4 md:grid-cols-3 w-full max-w-3xl">
+                    <!-- 示例资源卡片 -->
+                    <div class="overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-xl border-2 border-purple-200">
+                        <div class="bg-purple-50 px-4 sm:px-6 py-3 sm:py-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl sm:text-3xl">🎬</span>
+                                <span class="inline-flex items-center rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-bold text-purple-600">
+                                    视频微课
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 sm:p-6">
+                            <h3 class="mb-2 sm:mb-3 text-lg sm:text-xl font-bold text-gray-900">示例：小星星儿歌</h3>
+                            <p class="mb-3 sm:mb-4 text-gray-600 text-sm sm:text-base">适合3-4岁幼儿的经典儿歌教学</p>
+                            <button class="w-full flex items-center justify-center gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-white font-bold transition-all hover:scale-105 bg-purple-500 text-sm sm:text-base">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                播放微课
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-xl border-2 border-blue-200">
+                        <div class="bg-blue-50 px-4 sm:px-6 py-3 sm:py-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl sm:text-3xl">📊</span>
+                                <span class="inline-flex items-center rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-bold text-blue-600">
+                                    PPT课件
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 sm:p-6">
+                            <h3 class="mb-2 sm:mb-3 text-lg sm:text-xl font-bold text-gray-900">示例：认识颜色</h3>
+                            <p class="mb-3 sm:mb-4 text-gray-600 text-sm sm:text-base">适合4-5岁幼儿的颜色认知教学</p>
+                            <button class="w-full flex items-center justify-center gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-white font-bold transition-all hover:scale-105 bg-blue-500 text-sm sm:text-base">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                下载课件
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-xl border-2 border-green-200">
+                        <div class="bg-green-50 px-4 sm:px-6 py-3 sm:py-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl sm:text-3xl">🤖</span>
+                                <span class="inline-flex items-center rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-bold text-green-600">
+                                    AI互动
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 sm:p-6">
+                            <h3 class="mb-2 sm:mb-3 text-lg sm:text-xl font-bold text-gray-900">示例：智能问答</h3>
+                            <p class="mb-3 sm:mb-4 text-gray-600 text-sm sm:text-base">适合5-6岁幼儿的AI互动学习</p>
+                            <button class="w-full flex items-center justify-center gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-white font-bold transition-all hover:scale-105 bg-green-500 text-sm sm:text-base">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                开始互动
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 适用场景说明 -->
+        <div class="rounded-2xl sm:rounded-3xl bg-white p-6 sm:p-8 shadow-xl">
+            <h2 class="mb-6 sm:mb-8 text-center text-2xl sm:text-3xl font-bold gradient-text">
+                💡 适用场景说明
+            </h2>
+            <div class="grid gap-4 sm:gap-6 md:grid-cols-2">
+                <div class="flex gap-3 sm:gap-4 rounded-2xl bg-gradient-to-r from-purple-50 via-blue-50 to-green-50 p-4 sm:p-6 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                    <div class="flex-shrink-0">
+                        <span class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-blue-500 text-2xl sm:text-3xl shadow-lg">
+                            🏫
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="mb-2 text-lg sm:text-xl font-bold text-gray-900">幼儿园课堂</h3>
+                        <p class="text-gray-600 text-sm sm:text-base">老师使用PPT课件进行课堂教学，配合视频微课加深理解</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 sm:gap-4 rounded-2xl bg-gradient-to-r from-purple-50 via-blue-50 to-green-50 p-4 sm:p-6 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                    <div class="flex-shrink-0">
+                        <span class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-blue-500 text-2xl sm:text-3xl shadow-lg">
+                            👨‍👩‍👧‍👦
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="mb-2 text-lg sm:text-xl font-bold text-gray-900">家庭早教</h3>
+                        <p class="text-gray-600 text-sm sm:text-base">家长陪伴孩子观看视频微课，通过AI互动巩固知识</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 sm:gap-4 rounded-2xl bg-gradient-to-r from-purple-50 via-blue-50 to-green-50 p-4 sm:p-6 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                    <div class="flex-shrink-0">
+                        <span class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-blue-500 text-2xl sm:text-3xl shadow-lg">
+                            📚
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="mb-2 text-lg sm:text-xl font-bold text-gray-900">课后复习</h3>
+                        <p class="text-gray-600 text-sm sm:text-base">下载PPT课件和视频资源，随时进行课后复习</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 sm:gap-4 rounded-2xl bg-gradient-to-r from-purple-50 via-blue-50 to-green-50 p-4 sm:p-6 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                    <div class="flex-shrink-0">
+                        <span class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-blue-500 text-2xl sm:text-3xl shadow-lg">
+                            🤖
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="mb-2 text-lg sm:text-xl font-bold text-gray-900">AI智能辅导</h3>
+                        <p class="text-gray-600 text-sm sm:text-base">利用AI互动工具进行个性化学习辅导</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能特点 -->
+        <div class="mt-8 sm:mt-12 rounded-2xl sm:rounded-3xl bg-white p-6 sm:p-8 shadow-xl">
+            <h2 class="mb-6 sm:mb-8 text-center text-2xl sm:text-3xl font-bold gradient-text">
+                ✨ 功能特点
+            </h2>
+            <div class="grid gap-6 md:grid-cols-3">
+                <div class="text-center">
+                    <div class="mb-4 text-5xl sm:text-6xl">🎬</div>
+                    <h3 class="mb-2 text-lg sm:text-xl font-bold text-gray-900">视频微课</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">生动有趣的动画视频，让孩子爱上学习</p>
+                </div>
+                <div class="text-center">
+                    <div class="mb-4 text-5xl sm:text-6xl">📊</div>
+                    <h3 class="mb-2 text-lg sm:text-xl font-bold text-gray-900">PPT课件</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">专业的教学课件，支持课堂展示和下载</p>
+                </div>
+                <div class="text-center">
+                    <div class="mb-4 text-5xl sm:text-6xl">🤖</div>
+                    <h3 class="mb-2 text-lg sm:text-xl font-bold text-gray-900">AI互动</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">智能问答和互动游戏，个性化学习体验</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用提示 -->
+        <div class="mt-8 sm:mt-12 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-purple-100 via-blue-100 to-green-100 p-6 sm:p-8 shadow-xl">
+            <h2 class="mb-4 text-center text-xl sm:text-2xl font-bold text-gray-900">
+                📌 使用提示
+            </h2>
+            <ul class="space-y-2 text-gray-700 text-sm sm:text-base">
+                <li class="flex items-start gap-2">
+                    <span class="text-purple-600">•</span>
+                    <span>此为静态 HTML 演示版本，仅供展示和预览</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-blue-600">•</span>
+                    <span>完整功能（文件上传、资源管理）请使用 Next.js 版本</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-green-600">•</span>
+                    <span>支持响应式设计，可在手机、平板、电脑上正常访问</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-purple-600">•</span>
+                    <span>文件可离线使用，无需网络连接（视频除外）</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-blue-600">•</span>
+                    <span>部署到云端后，可随时随地访问</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="mt-8 sm:mt-16 text-center text-gray-600">
+            <p class="text-base sm:text-lg mb-2">🎈 三大技术模块 · 智能教育平台 🎈</p>
+            <p class="text-sm sm:text-base">© 2024 幼儿教育资源包 | 让每个孩子都快乐学习</p>
+            <p class="text-xs sm:text-sm mt-2 text-gray-500">🌍 支持移动端 · 平板 · PC 端全设备访问</p>
+        </div>
+    </div>
+
+    <script>
+        // 资源筛选功能（演示）
+        function filterResources(type) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            const activeClass = 'bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 text-white shadow-lg';
+            const inactiveClass = 'bg-white text-gray-700 hover:shadow-md';
+
+            buttons.forEach(btn => {
+                btn.className = 'filter-btn px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold transition-all duration-200 transform hover:scale-105 ' + inactiveClass + ' text-sm sm:text-base';
+            });
+
+            document.getElementById('btn-' + type).className = 'filter-btn px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold transition-all duration-200 transform hover:scale-105 ' + activeClass + ' text-sm sm:text-base';
+
+            // 演示：显示筛选提示
+            const container = document.getElementById('resources-container');
+            const typeNames = {
+                'all': '全部资源',
+                'video': '视频微课',
+                'ppt': 'PPT课件',
+                'ai': 'AI互动'
+            };
+
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl bg-white p-8 sm:p-16 shadow-xl">
+                    <div class="mb-6 text-5xl sm:text-6xl animate-bounce hero-emoji">🔍</div>
+                    <h3 class="mb-3 text-xl sm:text-2xl font-bold text-gray-900">
+                        已筛选：${typeNames[type]}
+                    </h3>
+                    <p class="mb-6 text-center text-gray-600 text-sm sm:text-base">
+                        这是演示版本，实际筛选功能请使用完整版
+                    </p>
+                    <button onclick="resetFilter()" class="flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 px-6 sm:px-8 py-3 sm:py-4 font-bold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 text-sm sm:text-base">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        重置筛选
+                    </button>
+                </div>
+            `;
+        }
+
+        function resetFilter() {
+            const buttons = document.querySelectorAll('.filter-btn');
+            const activeClass = 'bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 text-white shadow-lg';
+            const inactiveClass = 'bg-white text-gray-700 hover:shadow-md';
+
+            buttons.forEach(btn => {
+                btn.className = 'filter-btn px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold transition-all duration-200 transform hover:scale-105 ' + inactiveClass + ' text-sm sm:text-base';
+            });
+
+            document.getElementById('btn-all').className = 'filter-btn px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold transition-all duration-200 transform hover:scale-105 ' + activeClass + ' text-sm sm:text-base';
+
+            const container = document.getElementById('resources-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl bg-white p-8 sm:p-16 shadow-xl">
+                    <div class="mb-6 text-6xl sm:text-8xl animate-bounce hero-emoji">📭</div>
+                    <h3 class="mb-3 text-xl sm:text-2xl font-bold text-gray-900">
+                        演示版本
+                    </h3>
+                    <p class="mb-6 text-center text-gray-600 text-sm sm:text-base">
+                        这是静态 HTML 演示版本，暂无实际资源。<br>
+                        完整功能请使用 Next.js 版本。
+                    </p>
+                    <div class="grid gap-4 md:grid-cols-3 w-full max-w-3xl">
+                        <div class="overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-xl border-2 border-purple-200">
+                            <div class="bg-purple-50 px-4 sm:px-6 py-3 sm:py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-2xl sm:text-3xl">🎬</span>
+                                    <span class="inline-flex items-center rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-bold text-purple-600">视频微课</span>
+                                </div>
+                            </div>
+                            <div class="p-4 sm:p-6">
+                                <h3 class="mb-2 sm:mb-3 text-lg sm:text-xl font-bold text-gray-900">示例：小星星儿歌</h3>
+                                <p class="mb-3 sm:mb-4 text-gray-600 text-sm sm:text-base">适合3-4岁幼儿的经典儿歌教学</p>
+                                <button class="w-full flex items-center justify-center gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-white font-bold transition-all hover:scale-105 bg-purple-500 text-sm sm:text-base">
+                                    <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    播放微课
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-xl border-2 border-blue-200">
+                            <div class="bg-blue-50 px-4 sm:px-6 py-3 sm:py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-2xl sm:text-3xl">📊</span>
+                                    <span class="inline-flex items-center rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-bold text-blue-600">PPT课件</span>
+                                </div>
+                            </div>
+                            <div class="p-4 sm:p-6">
+                                <h3 class="mb-2 sm:mb-3 text-lg sm:text-xl font-bold text-gray-900">示例：认识颜色</h3>
+                                <p class="mb-3 sm:mb-4 text-gray-600 text-sm sm:text-base">适合4-5岁幼儿的颜色认知教学</p>
+                                <button class="w-full flex items-center justify-center gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-white font-bold transition-all hover:scale-105 bg-blue-500 text-sm sm:text-base">
+                                    <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                    下载课件
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-xl border-2 border-green-200">
+                            <div class="bg-green-50 px-4 sm:px-6 py-3 sm:py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-2xl sm:text-3xl">🤖</span>
+                                    <span class="inline-flex items-center rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-bold text-green-600">AI互动</span>
+                                </div>
+                            </div>
+                            <div class="p-4 sm:p-6">
+                                <h3 class="mb-2 sm:mb-3 text-lg sm:text-xl font-bold text-gray-900">示例：智能问答</h3>
+                                <p class="mb-3 sm:mb-4 text-gray-600 text-sm sm:text-base">适合5-6岁幼儿的AI互动学习</p>
+                                <button class="w-full flex items-center justify-center gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-white font-bold transition-all hover:scale-105 bg-green-500 text-sm sm:text-base">
+                                    <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                    开始互动
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
